@@ -158,6 +158,14 @@ def compile_plan(plan: QueryPlan, context: AccessContext) -> tuple[str, list, bo
             raise Unsupported('Protected-class reports support one protected grouping over customers.')
         if any(f.field in T5 for f in plan.filters):
             raise Unsupported('Protected-class attributes cannot be used as report filters.')
+        # Per-query cell floors cannot protect complementary cohorts. Keep every
+        # T5 breakdown on the same company-wide active population.
+        if plan.filters or plan.period or plan.requested_scope not in {'own_region', 'all_regions'}:
+            raise AccessDenied(
+                'Protected-class breakdowns use the company-wide active cohort. '
+                'Filtered, dated, or regional breakdowns could reveal an individual by subtraction.',
+                'protected_cohort_denied',
+            )
         if any(not (m.op == 'count' and m.field is None or m.op == 'avg' and m.field == 'annual_income_usd') for m in plan.metrics):
             raise Unsupported('Protected reports support customer counts and average annual income.')
 
@@ -305,7 +313,7 @@ def scrub_text(rows: list[dict], context: AccessContext, execution_log: list[dic
             if c['full_name'] not in visible_names:
                 banned.add(c['full_name'])
             banned.update(str(c[name]) for name in T2 | T3 | T4 if c[name] is not None)
-    pattern = re.compile(r'(?<![\w])(?:' + '|'.join(re.escape(v) for v in sorted(banned, key=len, reverse=True)) + r')(?![\w])') if banned else None
+    pattern = re.compile(r'(?<![\w])(?:' + '|'.join(re.escape(v) for v in sorted(banned, key=len, reverse=True)) + r')(?![\w])', re.IGNORECASE) if banned else None
     redacted = False
     for row in rows:
         for name in ('memo', 'body'):
@@ -336,7 +344,7 @@ def execute(plan: QueryPlan, context: AccessContext, execution_log: list[dict]) 
         rows = rows[:plan.limit]
         notes.append(f'Detail results are limited to {plan.limit} rows; aggregate queries use the full matching population.')
     columns = list(rows[0]) if rows else list(plan.fields)
-    actual_scope = context.public_scope() | {'customers': plan.customer_state}
+    actual_scope = context.public_scope() if plan.dataset == 'users' else context.public_scope() | {'customers': plan.customer_state}
     if plan.period:
         actual_scope['period'] = plan.period.model_dump()
     for item in plan.filters:

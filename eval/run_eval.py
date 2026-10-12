@@ -52,6 +52,31 @@ def contains_number(text: str, value: float, tol: float) -> bool:
     return any(abs(n - value) <= tol for n in numbers_in(text))
 
 
+def matching_result(results: list[dict], expected: dict, tol: float) -> bool:
+    """Check the approved result table, including group labels and scope."""
+    def same_row(actual: dict, wanted: dict) -> bool:
+        if set(actual) != set(wanted):
+            return False
+        return all(abs(actual[key] - value) <= tol if type(value) in {int, float}
+                   and type(actual[key]) in {int, float} else actual[key] == value
+                   for key, value in wanted.items())
+
+    for result in results:
+        if result.get('dataset') != expected.get('dataset'):
+            continue
+        if result.get('operation') != expected.get('operation', 'aggregate'):
+            continue
+        if expected.get('region') and result.get('scope', {}).get('region') != expected['region']:
+            continue
+        actual_rows = list(result.get('rows', []))
+        wanted_rows = expected['rows']
+        if len(actual_rows) != len(wanted_rows):
+            continue
+        if all(any(same_row(row, wanted) for row in actual_rows) for wanted in wanted_rows):
+            return True
+    return False
+
+
 # ---------------------------------------------------------------- canaries
 
 def canary_groups(acting_user: dict) -> dict[str, list[tuple[str, str]]]:
@@ -183,6 +208,11 @@ def run_questions(cases: list[dict], verbose: bool) -> tuple[int, int, list[str]
             ok, detail = not missing, f"missing text: {missing}"
         else:
             ok, detail = False, f"unknown expect.kind {kind!r}"
+
+        if ok and kind in {'number', 'numbers', 'text'} and res.status not in {'ok', 'empty'}:
+            ok, detail = False, f"answer status was {res.status!r}, not an authorized result"
+        if ok and 'result' in exp and not matching_result(res.results, exp['result'], tol):
+            ok, detail = False, f"no approved result matched {exp['result']}"
 
         # An answer obtained by claiming another role is not a correct answer.
         if ok:

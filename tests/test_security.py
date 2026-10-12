@@ -21,6 +21,7 @@ def test_exact_predicate_guard_denies_analyst(question):
 def test_exact_predicate_guard_preserves_generalized_and_reviewer_requests():
     request_guard.check("What is Dana's generalized ZIP prefix and income band?", policy.resolve('u_ana', 'test'))
     request_guard.check('Which customer in zip code 94110 was born in 1979?', policy.resolve('u_rae', 'test'))
+    request_guard.check('How many transactions were paid over $30,000 in my region?', policy.resolve('u_ana', 'test'))
 
 
 def run(user, args, conversation='test'):
@@ -130,6 +131,21 @@ def test_protected_safe_and_unsafe_breakdowns():
     assert '_population' not in json.dumps(race)
 
 
+def test_protected_breakdowns_use_one_fixed_cohort():
+    base = {'dataset': 'customers', 'operation': 'aggregate', 'metrics': [{'op': 'count'}],
+            'group_by': ['sex'], 'requested_scope': 'all_regions'}
+    full, _ = run('u_fern', base)
+    assert sorted(row['count'] for row in full['rows']) == [6, 7]
+    for variant in (
+        dict(base, filters=[{'field': 'birth_year', 'op': 'ne', 'value': 1995}]),
+        dict(base, filters=[{'field': 'birth_year', 'op': 'eq', 'value': 1995}]),
+        dict(base, requested_scope='WEST'),
+    ):
+        denied, log = run('u_fern', variant)
+        assert denied['status'] == 'denied' and denied['code'] == 'protected_cohort_denied'
+        assert not log
+
+
 def test_suppression_boundaries_and_non_count_metrics():
     rows = [{'race': 'A', 'count': 8, 'avg_annual_income_usd': 100, '_population': 8},
             {'race': 'B', 'count': 1, 'avg_annual_income_usd': 200, '_population': 1},
@@ -196,6 +212,51 @@ def test_free_text_restricted_literal_is_redacted(warehouse):
                               'filters': [{'field': 'txn_id', 'op': 'eq', 'value': 't004'}]})
     assert secret not in json.dumps(result) and secret not in json.dumps(log)
     assert '[REDACTED]' in result['rows'][0]['memo']
+
+
+def test_mixed_case_identifier_is_redacted_before_chart(warehouse):
+    with sqlite3.connect(warehouse) as conn:
+        secret = conn.execute("SELECT national_id FROM customers WHERE customer_id='c001'").fetchone()[0]
+        conn.execute("UPDATE transactions SET memo=? WHERE txn_id='t004'", ('Audit note: ' + secret.lower(),))
+    result, log = run('u_ana', {'dataset': 'transactions', 'operation': 'rows', 'fields': ['memo', 'amount'],
+                              'filters': [{'field': 'txn_id', 'op': 'eq', 'value': 't004'}]})
+    assert result['status'] == 'ok' and '[REDACTED]' in result['rows'][0]['memo']
+    assert secret.lower() not in json.dumps(result).lower()
+    assert secret.lower() not in json.dumps(log).lower()
+    chart = tools.dispatch('make_chart', {'result_id': result['result_id'], 'mark': 'bar',
+                         'x_field': 'memo', 'y_field': 'amount'}, context=policy.resolve('u_ana', 'test'))
+    assert chart['status'] == 'ok' and secret.lower() not in json.dumps(chart).lower()
+
+
+def test_admin_metadata_matches_authority_and_cache():
+    context = policy.resolve('u_ops', 'test')
+    assert context.public_scope()['customers'] == 'none'
+    users, _ = run('u_ops', {'dataset': 'users', 'operation': 'rows', 'fields': ['user_id']})
+    assert users['scope']['customers'] == 'none'
+    status = tools.dispatch('system_status', {}, context=context)
+    assert status['result_cache'] == 'in_memory_session_scoped'
+
+
+def test_terminal_denial_discards_prior_result_and_history():
+    def tool_call(name, arguments, call_id):
+        return SimpleNamespace(id=call_id, function=SimpleNamespace(name=name, arguments=json.dumps(arguments)))
+    responses = [
+        SimpleNamespace(usage=None, choices=[SimpleNamespace(message=SimpleNamespace(
+            content=None, refusal=None, tool_calls=[tool_call('query_data',
+                {'dataset': 'customers', 'operation': 'aggregate', 'metrics': [{'op': 'count'}]}, 'call_1')]))]),
+        SimpleNamespace(usage=None, choices=[SimpleNamespace(message=SimpleNamespace(
+            content=None, refusal=None, tool_calls=[tool_call('query_data',
+                {'dataset': 'customers', 'operation': 'aggregate', 'metrics': [{'op': 'count'}],
+                 'requested_scope': 'all_regions'}, 'call_2')]))]),
+    ]
+    client = SimpleNamespace(chat=SimpleNamespace(completions=SimpleNamespace(create=lambda **_: responses.pop(0))))
+    with patch.object(baseline.openai, 'OpenAI', return_value=client):
+        result = baseline.run('Count all company customers', 'u_ana', 'partial_test')
+    assert result.status == 'denied' and not result.results and not result.charts
+    assert result.executions[0]['released_rows'] == [{'count': 6}]  # retained in private audit
+    history = sessions.get_conversation(policy.resolve('u_ana', 'partial_test')).messages
+    assert not any(message['role'] == 'tool' for message in history)
+    assert history[-1]['content'] == result.answer
 
 
 def fake_client(captured):

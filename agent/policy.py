@@ -10,7 +10,7 @@ T3 = frozenset({"annual_income_usd"})
 T4 = frozenset({"national_id", "email", "phone"})
 T5 = frozenset({"race", "ethnicity", "sex"})
 CUSTOMER_COLUMNS = T0 | T1 | T2 | T3 | T4 | T5
-VERSION = "2026-10-10-v1"
+VERSION = "2026-10-12-v2"
 
 class AccessDenied(Exception):
     def __init__(self, reason: str, code: str = "access_denied"):
@@ -49,7 +49,8 @@ class AccessContext:
 
     def public_scope(self) -> dict:
         return {"region": self.region if self.policy.own_region else "all",
-                "customers": "active" if self.policy.active_only else "active_or_offboarded",
+                "customers": "none" if self.role == "admin" else (
+                    "active" if self.policy.active_only else "active_or_offboarded"),
                 "aggregate_only": self.policy.aggregate_only,
                 "datasets": sorted(self.policy.datasets), "policy_version": VERSION}
 

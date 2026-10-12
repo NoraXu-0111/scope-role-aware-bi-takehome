@@ -9,7 +9,7 @@ import re
 from .policy import AccessContext, AccessDenied
 
 _EXACT_ZIP = re.compile(r"\b(?:zip(?:\s+code)?|postal\s+code)\s*(?:is|=|of|in|:)?\s*\d{5}(?:-\d{4})?\b", re.I)
-_INCOME_TOPIC = re.compile(r"\b(?:earn\w*|income|salary|make\w*|paid)\b", re.I)
+_INCOME_TOPIC = re.compile(r"\b(?:earn\w*|income|salary|compensation|wages?|annual\s+pay)\b", re.I)
 _THRESHOLD = re.compile(r"\b(?:more than|greater than|less than|at least|at most|above|below|over|under|exceed\w*|between)\s*\$?\s*\d[\d,]*(?:\.\d+)?\b", re.I)
 
 

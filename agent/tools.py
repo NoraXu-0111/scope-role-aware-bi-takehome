@@ -62,7 +62,7 @@ def dispatch(name: str, args: dict, *, context: AccessContext, execution_log: li
                 raise AccessDenied('System operations are restricted to the admin identity.', 'operations_denied')
             if name == 'system_status':
                 return {'status': 'ok', 'warehouse': 'available', 'access_mode': 'read_only',
-                        'result_cache': 'disabled', 'policy_version': context.public_scope()['policy_version']}
+                        'result_cache': 'in_memory_session_scoped', 'policy_version': context.public_scope()['policy_version']}
             rows = db.execute('SELECT sql FROM sqlite_master WHERE type = ? AND name = ?', ['table', parsed.table])
             log.append({'sql': 'SELECT sql FROM sqlite_master WHERE type = ? AND name = ?',
                         'parameters': ['table', parsed.table], 'status': 'ok', 'released_rows': rows,

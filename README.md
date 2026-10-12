@@ -25,7 +25,7 @@ Open <http://127.0.0.1:8765>. Choose a demonstration identity, ask a question, t
 cd web && npm run build && npx playwright test
 ```
 
-Playwright expects the API server above to be running on port 8765. The full evaluation calls the model and uses the configured API key. Its latest text output is [artifacts/eval.txt](artifacts/eval.txt).
+Playwright expects the API server above to be running on port 8765. The full evaluation calls the model and uses the configured API key. The saved [artifacts/eval.txt](artifacts/eval.txt) predates the independent review fixes; rerun the model-backed suite before treating its score as current.
 
 ## Deliverables
 

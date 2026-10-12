@@ -50,9 +50,10 @@ def authenticate(authorization: str | None) -> DemoSession:
 
 
 def public_result(result: baseline.AgentResult) -> dict:
+    complete = result.status in {'ok', 'empty'}
     return {'answer': result.answer, 'status': result.status, 'identity': result.identity,
-            'scope': result.scope, 'audit_id': result.audit_id, 'results': result.results,
-            'charts': result.charts, 'error': result.error, 'events': result.events,
+            'scope': result.scope, 'audit_id': result.audit_id, 'results': result.results if complete else [],
+            'charts': result.charts if complete else [], 'error': result.error, 'events': result.events,
             'metrics': {'model': baseline.MODEL, 'seconds': result.elapsed_seconds,
                         'input_tokens': result.input_tokens, 'cached_tokens': result.cached_tokens,
                         'output_tokens': result.output_tokens, 'estimated_cost_usd': result.estimated_cost_usd},

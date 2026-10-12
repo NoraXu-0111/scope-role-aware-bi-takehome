@@ -68,6 +68,14 @@ def clear_results(conversation_id: str) -> None:
             if _results[key][1] == conversation_id:
                 del _results[key]
 
+def discard_results(context: AccessContext, result_ids: list[str]) -> None:
+    """Revoke results produced by a turn that ended without an answer."""
+    with _lock:
+        for key in result_ids:
+            item = _results.get(key)
+            if item and item[0] == context.fingerprint and item[1] == context.conversation_id:
+                del _results[key]
+
 def drop(conversation_id: str) -> None:
     with _lock:
         _conversations.pop(conversation_id, None)

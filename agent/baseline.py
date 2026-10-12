@@ -122,6 +122,7 @@ def run(question: str, user_id: str, conversation_id: str | None = None,
             user_positions = [i for i, m in enumerate(messages) if m['role'] == 'user']
             if len(user_positions) > 6:
                 messages = [messages[0]] + messages[user_positions[-6]:]
+            prior_messages = copy.deepcopy(messages)
             messages.append({'role': 'user', 'content': question})
             result.transcript.append('[user] ' + question)
             client = openai.OpenAI(timeout=45.0, max_retries=1)
@@ -148,6 +149,8 @@ def run(question: str, user_id: str, conversation_id: str | None = None,
                 message = response.choices[0].message
                 if getattr(message, 'refusal', None):
                     result.status, result.declined, result.answer = 'denied', True, 'The assistant declined this request.'
+                    messages = prior_messages + [{'role': 'user', 'content': question},
+                                                 {'role': 'assistant', 'content': result.answer}]
                     break
                 assistant = {'role': 'assistant', 'content': message.content}
                 if message.tool_calls:
@@ -197,6 +200,10 @@ def run(question: str, user_id: str, conversation_id: str | None = None,
                         result.declined = output['status'] in {'denied', 'unsupported'}
                         terminal = True
                 if terminal:
+                    # A later refusal must not publish an earlier, narrower
+                    # result or carry it into the next model turn.
+                    messages = prior_messages + [{'role': 'user', 'content': question},
+                                                 {'role': 'assistant', 'content': result.answer}]
                     break
             else:
                 result.status, result.error = 'error', 'The query reached its step limit. Please narrow the request.'
@@ -212,6 +219,11 @@ def run(question: str, user_id: str, conversation_id: str | None = None,
     except (db.SQLError, ValueError) as exc:
         result.status, result.error = 'error', str(exc) if isinstance(exc, db.SQLError) else 'The model configuration is unavailable.'
     finally:
+        if result.status in {'denied', 'unsupported', 'clarify', 'error'}:
+            if context is not None:
+                sessions.discard_results(context, [r['result_id'] for r in result.results if 'result_id' in r])
+            result.results.clear()
+            result.charts.clear()
         result.elapsed_seconds = round(time.perf_counter() - started, 3)
         result.estimated_cost_usd = config.estimated_cost(result.input_tokens, result.cached_tokens, result.output_tokens)
         result.sql_log = [e['sql'] for e in result.executions]

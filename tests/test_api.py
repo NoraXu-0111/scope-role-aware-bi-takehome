@@ -65,6 +65,19 @@ def test_private_redaction_lookup_is_not_a_public_query():
     assert public_result(result)['executions'] == []
 
 
+def test_denied_turn_never_publishes_partial_cards_or_charts():
+    from api.main import public_result
+    from agent.baseline import AgentResult
+    result = AgentResult(status='denied', answer='Only your region is available.',
+        results=[{'rows': [{'count': 6}]}], charts=[{'data': {'values': [{'count': 6}]}}],
+        executions=[{'sql': 'SELECT COUNT(*)', 'parameters': [], 'status': 'ok',
+                     'released_rows': [{'count': 6}], 'released_row_count': 1, 'redactions': []}])
+    public = public_result(result)
+    assert public['results'] == [] and public['charts'] == []
+    assert public['executions'] == [{'sql': 'SELECT COUNT(*)', 'parameters': [], 'status': 'ok',
+                                     'released_row_count': 1, 'redactions': []}]
+
+
 def test_access_change_before_http_release_discards_old_answer(client, monkeypatch):
     import sqlite3
     from agent import baseline, db

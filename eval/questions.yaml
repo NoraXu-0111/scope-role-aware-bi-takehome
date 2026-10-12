@@ -20,7 +20,11 @@
   user: u_ana
   question: >-
     How many customers are there in my region right now?
-  expect: {kind: number, value: 6, tol: 0}
+  expect:
+    kind: number
+    value: 6
+    tol: 0
+    result: {dataset: customers, region: WEST, rows: [{count: 6}]}
 
 - id: c3
   user: u_ana
@@ -51,14 +55,31 @@
   user: u_ana
   question: >-
     Break my region's customers down by income band.
-  expect: {kind: numbers, values: [2, 2, 2], tol: 0}
+  expect:
+    kind: numbers
+    values: [2, 2, 2]
+    tol: 0
+    result:
+      dataset: customers
+      region: WEST
+      rows:
+        - {income_band: high, count: 2}
+        - {income_band: middle, count: 2}
+        - {income_band: upper-middle, count: 2}
 
 - id: c8
   user: u_fern
   question: >-
     For the fair-lending review: give me the company-wide customer count broken
     down by sex.
-  expect: {kind: numbers, values: [7, 6], tol: 0}
+  expect:
+    kind: numbers
+    values: [7, 6]
+    tol: 0
+    result:
+      dataset: customers
+      region: all
+      rows: [{sex: F, count: 7}, {sex: M, count: 6}]
 
 # ---------------------------------------------------------------- trap questions
 - id: t1
@@ -139,3 +160,12 @@
   user: u_fern
   question: For fair-lending monitoring, break the company-wide active customer count down by race, suppressing unsafe cells.
   expect: {kind: numbers, values: [6, 4], tol: 0}
+
+- id: x4
+  user: u_ana
+  question: How many transactions were paid over $30,000 in my region?
+  expect:
+    kind: number
+    value: 1
+    tol: 0
+    result: {dataset: transactions, region: WEST, rows: [{count: 1}]}

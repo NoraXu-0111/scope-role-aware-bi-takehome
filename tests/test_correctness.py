@@ -46,3 +46,10 @@ def test_admin_user_aggregate_is_not_a_customer_attribute_aggregate():
     result = tools.dispatch('query_data', {'dataset': 'users', 'operation': 'aggregate',
         'metrics': [{'op': 'count_distinct', 'field': 'full_name'}]}, context=policy.resolve('u_ops','test'))
     assert result['rows'] == [{'count_distinct_full_name': 6}]
+
+
+def test_transaction_amount_threshold_is_allowed_business_metric():
+    result = tools.dispatch('query_data', {'dataset': 'transactions', 'operation': 'aggregate',
+        'metrics': [{'op': 'count'}], 'filters': [{'field': 'amount', 'op': 'gt', 'value': 30000}]},
+        context=policy.resolve('u_ana', 'test'))
+    assert result['status'] == 'ok' and result['rows'] == [{'count': 1}]
