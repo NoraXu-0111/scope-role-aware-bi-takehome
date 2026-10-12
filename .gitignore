@@ -9,4 +9,5 @@ web/dist/
 .DS_Store
 artifacts/*.webm
 artifacts/*.mp4
+artifacts/*.bundle
 *.tsbuildinfo
