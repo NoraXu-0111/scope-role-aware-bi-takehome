@@ -217,7 +217,8 @@ def test_free_text_restricted_literal_is_redacted(warehouse):
 def test_mixed_case_identifier_is_redacted_before_chart(warehouse):
     with sqlite3.connect(warehouse) as conn:
         secret = conn.execute("SELECT national_id FROM customers WHERE customer_id='c001'").fetchone()[0]
-        conn.execute("UPDATE transactions SET memo=? WHERE txn_id='t004'", ('Audit note: ' + secret.lower(),))
+        conn.execute("UPDATE transactions SET memo=? WHERE txn_id='t004'",
+                     ('Audit note: ' + secret.lower() + '; wrapped x' + secret.lower() + 'y',))
     result, log = run('u_ana', {'dataset': 'transactions', 'operation': 'rows', 'fields': ['memo', 'amount'],
                               'filters': [{'field': 'txn_id', 'op': 'eq', 'value': 't004'}]})
     assert result['status'] == 'ok' and '[REDACTED]' in result['rows'][0]['memo']
@@ -226,6 +227,17 @@ def test_mixed_case_identifier_is_redacted_before_chart(warehouse):
     chart = tools.dispatch('make_chart', {'result_id': result['result_id'], 'mark': 'bar',
                          'x_field': 'memo', 'y_field': 'amount'}, context=policy.resolve('u_ana', 'test'))
     assert chart['status'] == 'ok' and secret.lower() not in json.dumps(chart).lower()
+
+
+def test_wrapped_email_is_redacted_from_reviewer_note(warehouse):
+    with sqlite3.connect(warehouse) as conn:
+        email = conn.execute("SELECT email FROM customers WHERE customer_id='c001'").fetchone()[0]
+        conn.execute("UPDATE case_notes SET body=? WHERE note_id='n001'",
+                     ('Contact x' + email.upper() + 'y for review.',))
+    result, log = run('u_rae', {'dataset': 'case_notes', 'operation': 'rows', 'fields': ['body'],
+                              'filters': [{'field': 'note_id', 'op': 'eq', 'value': 'n001'}]})
+    assert result['status'] == 'ok' and email.lower() not in json.dumps(result).lower()
+    assert email.lower() not in json.dumps(log).lower()
 
 
 def test_admin_metadata_matches_authority_and_cache():

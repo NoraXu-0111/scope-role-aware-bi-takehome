@@ -301,6 +301,7 @@ def scrub_text(rows: list[dict], context: AccessContext, execution_log: list[dic
                               'execution_row_count': len(customers), 'released_rows': [],
                               'released_row_count': 0, 'redactions': []})
     banned: set[str] = set()
+    direct_identifiers: set[str] = set()
     forbidden = (T2 | T3 | T4 | T5) - context.policy.customer_columns
     visible = [c for c in customers if (not context.policy.own_region or c['region'] == context.region)
                and (not context.policy.active_only or c['deleted_at'] is None)]
@@ -308,12 +309,21 @@ def scrub_text(rows: list[dict], context: AccessContext, execution_log: list[dic
     visible_ids = {c['customer_id'] for c in visible}
     for c in customers:
         banned.update(str(c[name]) for name in forbidden if c[name] is not None)
+        direct_identifiers.update(str(c[name]) for name in T4 & forbidden if c[name] is not None)
         if c['customer_id'] not in visible_ids:
             banned.add(c['customer_id'])
+            direct_identifiers.add(c['customer_id'])
             if c['full_name'] not in visible_names:
                 banned.add(c['full_name'])
             banned.update(str(c[name]) for name in T2 | T3 | T4 if c[name] is not None)
-    pattern = re.compile(r'(?<![\w])(?:' + '|'.join(re.escape(v) for v in sorted(banned, key=len, reverse=True)) + r')(?![\w])', re.IGNORECASE) if banned else None
+            direct_identifiers.update(str(c[name]) for name in T4 if c[name] is not None)
+    # Direct identifiers remain sensitive inside attacker-supplied wrappers such as
+    # "ref<identifier>end". Keep word boundaries for shorter/general values so a
+    # single-letter protected category does not erase ordinary prose.
+    anywhere = [re.escape(v) for v in sorted(direct_identifiers, key=len, reverse=True)]
+    bounded = [re.escape(v) for v in sorted(banned - direct_identifiers, key=len, reverse=True)]
+    alternatives = anywhere + ([r'(?<![\w])(?:' + '|'.join(bounded) + r')(?![\w])'] if bounded else [])
+    pattern = re.compile('(?:' + '|'.join(alternatives) + ')', re.IGNORECASE) if alternatives else None
     redacted = False
     for row in rows:
         for name in ('memo', 'body'):
