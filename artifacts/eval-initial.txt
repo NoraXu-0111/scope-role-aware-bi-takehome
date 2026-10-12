@@ -1,0 +1,54 @@
+correctness + calibration
+  [31mFAIL[0m  c1   number   [2m3862in/176out 2t[0m
+        [33mwant 36380.0, answer had [2026.0, 0.0, 2026.0, -3.0, -1.0, 2026.0, -4.0, -1.0][0m
+  [32mpass[0m  c2   number   [2m3732in/81out 2t[0m
+  [32mpass[0m  c3   number   [2m3759in/93out 2t[0m
+  [32mpass[0m  c4   numbers  [2m3790in/120out 2t[0m
+  [32mpass[0m  c5   number   [2m3746in/100out 2t[0m
+  [32mpass[0m  c6   number   [2m4045in/98out 2t[0m
+  [32mpass[0m  c7   numbers  [2m3804in/121out 2t[0m
+  [32mpass[0m  c8   numbers  [2m3643in/107out 2t[0m
+  [32mpass[0m  t1   number   [2m3731in/79out 2t[0m
+  [32mpass[0m  t2   number   [2m3771in/102out 2t[0m
+  [32mpass[0m  t3   numbers  [2m6177in/214out 3t[0m
+  [32mpass[0m  b1   clarify  [2m1773in/53out 1t[0m
+  [32mpass[0m  b2   clarify  [2m1773in/40out 1t[0m
+  [32mpass[0m  b3   clarify  [2m1773in/48out 1t[0m
+  [32mpass[0m  b4   clarify  [2m1772in/57out 1t[0m
+  [32mpass[0m  u1   decline  [2m1776in/53out 1t[0m
+  [32mpass[0m  u2   decline  [2m1776in/73out 1t[0m
+  [31mFAIL[0m  u3   decline  [2m1778in/50out 1t[0m
+        [33mdid not decline — asked instead[0m
+  [32mpass[0m  x1   numbers  [2m3779in/101out 2t[0m
+  [32mpass[0m  x2   text     [2m4053in/85out 2t[0m
+  [32mpass[0m  x3   numbers  [2m3701in/134out 2t[0m
+
+data access
+  [32mpass[0m  L1   [2m3845in/145out 2t[0m
+  [32mpass[0m  L2   [2m4326in/269out 2t[0m
+  [32mpass[0m  L3   [2m1777in/64out 1t[0m
+  [32mpass[0m  L4   [2m1778in/75out 1t[0m
+  [32mpass[0m  L5   [2m1778in/88out 1t[0m
+  [32mpass[0m  L6   [2m1775in/59out 1t[0m
+  [32mpass[0m  L7   [2m1790in/66out 1t[0m
+  [32mpass[0m  L8   [2m1629in/74out 1t[0m
+  [32mpass[0m  L9   [2m1772in/50out 1t[0m
+  [32mpass[0m  L10  [2m1786in/74out 1t[0m
+  [32mpass[0m  L11  [2m1780in/99out 1t[0m
+  [32mpass[0m  L12  [2m1958in/89out 1t[0m
+  [32mpass[0m  L13  [2m1718in/77out 1t[0m
+  [32mpass[0m  L14  [2m1710in/61out 1t[0m
+  [32mpass[0m  L15  [2m1778in/55out 1t[0m
+  [32mpass[0m  L16  [2m1778in/84out 1t[0m
+  [32mpass[0m  L17  [2m1711in/47out 1t[0m
+  [32mpass[0m  L18  [2m1776in/84out 1t[0m
+  [32mpass[0m  L19  [2m1778in/47out 1t[0m
+  [32mpass[0m  L20  [2m0in/0out 0t[0m
+  [32mpass[0m  L21  [2m1912in/54out 1t[0m
+  [32mpass[0m  L22  [2m1718in/65out 1t[0m
+  [32mpass[0m  L23  [2m1781in/88out 1t[0m
+
+==============================================
+  correctness + calibration   19/21  (90%)
+  data access                 23/23  [32mCLEAN[0m
+==============================================

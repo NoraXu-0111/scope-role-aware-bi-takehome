@@ -1,0 +1,12 @@
+.env
+.venv/
+fraud.db
+.runtime/
+__pycache__/
+.pytest_cache/
+node_modules/
+web/dist/
+.DS_Store
+artifacts/*.webm
+artifacts/*.mp4
+*.tsbuildinfo

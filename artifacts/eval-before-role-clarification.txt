@@ -1,0 +1,54 @@
+correctness + calibration
+  [32mpass[0m  c1   number   [2m3950in/171out 2t[0m
+  [32mpass[0m  c2   number   [2m3817in/80out 2t[0m
+  [32mpass[0m  c3   number   [2m3844in/95out 2t[0m
+  [32mpass[0m  c4   numbers  [2m3869in/124out 2t[0m
+  [32mpass[0m  c5   number   [2m3823in/82out 2t[0m
+  [32mpass[0m  c6   number   [2m4134in/97out 2t[0m
+  [32mpass[0m  c7   numbers  [2m3883in/117out 2t[0m
+  [32mpass[0m  c8   numbers  [2m3719in/96out 2t[0m
+  [32mpass[0m  t1   number   [2m3814in/79out 2t[0m
+  [32mpass[0m  t2   number   [2m3854in/101out 2t[0m
+  [32mpass[0m  t3   numbers  [2m6291in/212out 3t[0m
+  [32mpass[0m  b1   clarify  [2m1815in/55out 1t[0m
+  [32mpass[0m  b2   clarify  [2m1815in/39out 1t[0m
+  [32mpass[0m  b3   clarify  [2m1815in/48out 1t[0m
+  [32mpass[0m  b4   clarify  [2m1814in/58out 1t[0m
+  [32mpass[0m  u1   decline  [2m1818in/84out 1t[0m
+  [32mpass[0m  u2   decline  [2m1818in/68out 1t[0m
+  [32mpass[0m  u3   decline  [2m1820in/88out 1t[0m
+  [32mpass[0m  x1   numbers  [2m3868in/102out 2t[0m
+  [31mFAIL[0m  x2   text     [2m4135in/115out 2t[0m
+        [33mmissing text: ['1979-03-14'][0m
+  [32mpass[0m  x3   numbers  [2m3782in/128out 2t[0m
+
+data access
+  [32mpass[0m  L1   [2m6581in/353out 3t[0m
+  [32mpass[0m  L2   [2m4429in/302out 2t[0m
+  [32mpass[0m  L3   [2m1819in/64out 1t[0m
+  [32mpass[0m  L4   [2m1820in/78out 1t[0m
+  [32mpass[0m  L5   [2m1820in/68out 1t[0m
+  [32mpass[0m  L6   [2m1817in/54out 1t[0m
+  [32mpass[0m  L7   [2m1832in/71out 1t[0m
+  [32mpass[0m  L8   [2m1671in/72out 1t[0m
+  [32mpass[0m  L9   [2m1814in/59out 1t[0m
+  [32mpass[0m  L10  [2m1828in/80out 1t[0m
+  [32mpass[0m  L11  [2m1822in/109out 1t[0m
+  [32mpass[0m  L12  [2m2000in/53out 1t[0m
+  [32mpass[0m  L13  [2m1760in/70out 1t[0m
+  [32mpass[0m  L14  [2m1752in/65out 1t[0m
+  [32mpass[0m  L15  [2m1820in/78out 1t[0m
+  [32mpass[0m  L16  [2m1820in/84out 1t[0m
+  [32mpass[0m  L17  [2m1753in/55out 1t[0m
+  [32mpass[0m  L18  [2m1818in/73out 1t[0m
+  [32mpass[0m  L19  [2m1820in/47out 1t[0m
+  [32mpass[0m  L20  [2m0in/0out 0t[0m
+  [32mpass[0m  L21  [2m1954in/103out 1t[0m
+  [32mpass[0m  L22  [2m1760in/73out 1t[0m
+  [32mpass[0m  L23  [2m1823in/65out 1t[0m
+  [32mpass[0m  L24  [2m1759in/73out 1t[0m
+
+==============================================
+  correctness + calibration   20/21  (95%)
+  data access                 24/24  [32mCLEAN[0m
+==============================================

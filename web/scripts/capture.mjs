@@ -1,0 +1,13 @@
+import {chromium} from 'playwright';
+import {mkdir} from 'node:fs/promises';
+await mkdir('artifacts',{recursive:true});
+const browser=await chromium.launch({channel:'chrome',headless:true});
+const page=await browser.newPage({viewport:{width:1440,height:1000}});
+await page.goto('http://127.0.0.1:8765');
+await page.locator('#identity').waitFor();
+await page.waitForFunction(()=>document.querySelector('#identity')?.value==='u_ana');
+await page.screenshot({path:'artifacts/workspace.png',fullPage:true});
+await page.setViewportSize({width:390,height:844});
+await page.screenshot({path:'artifacts/workspace-mobile.png',fullPage:true});
+await browser.close();
+console.log('Saved desktop and mobile screenshots.');
