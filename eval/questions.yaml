@@ -169,3 +169,37 @@
     value: 1
     tol: 0
     result: {dataset: transactions, region: WEST, rows: [{count: 1}]}
+
+# Multi-turn cases: the setup answer stays in the same authorized conversation.
+- id: f1
+  user: u_ana
+  setup: {question: 'How many transactions were paid over $30,000 in my region?'}
+  question: Of those, how many were wires?
+  expect:
+    kind: number
+    value: 1
+    tol: 0
+    result: {dataset: transactions, region: WEST, rows: [{count: 1}]}
+    query_evidence:
+      sql_contains: [amount_minor, channel]
+      parameters_include: [30000, wire]
+
+- id: f2
+  user: u_cora
+  setup: {question: 'How many active customers are there across the company?'}
+  question: And how many are there including offboarded customers?
+  expect:
+    kind: number
+    value: 15
+    tol: 0
+    result: {dataset: customers, region: all, scope: {customers: all}, rows: [{count: 15}]}
+    query_evidence:
+      sql_contains: [customers]
+
+- id: f3
+  user: u_ana
+  setup: {question: 'Break down the alerts in my region by rule.'}
+  question: Please make a bar chart from that breakdown.
+  expect:
+    kind: chart
+    chart_counts: [3, 2, 2, 1]

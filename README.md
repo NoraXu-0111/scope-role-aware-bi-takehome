@@ -21,11 +21,12 @@ Open <http://127.0.0.1:8765>. Choose a demonstration identity, ask a question, t
 ```bash
 .venv/bin/pytest -q
 .venv/bin/python eval/run_eval.py --only leaks
+.venv/bin/python eval/run_eval.py --ids f1,f2,f3
 .venv/bin/python eval/run_eval.py --report artifacts/eval.json
 cd web && npm run build && npx playwright test
 ```
 
-Playwright expects the API server above to be running on port 8765. The full evaluation calls the model and uses the configured API key. The saved [artifacts/eval.txt](artifacts/eval.txt) and [artifacts/eval.json](artifacts/eval.json) are from the final post-review run: 22/22 correctness and 24/24 access clean.
+Playwright expects the API server above to be running on port 8765. The full evaluation calls the model and uses the configured API key. The saved [artifacts/eval.txt](artifacts/eval.txt) and [artifacts/eval.json](artifacts/eval.json) are the last completed full run (22/22 correctness, 24/24 access), before the three follow-up cases were added. Their focused real-model run passed 3/3; a later expanded full run encountered model-service errors and remains unverified. See [NOTES.md](NOTES.md) for the exact commands and attempt records.
 
 ## Deliverables
 

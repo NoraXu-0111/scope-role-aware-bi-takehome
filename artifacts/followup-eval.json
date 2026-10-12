@@ -1,0 +1,106 @@
+{
+  "model": "gpt-5.5",
+  "questions": {
+    "passed": 3,
+    "total": 3
+  },
+  "leaks": {
+    "passed": 0,
+    "total": 0
+  },
+  "p50_seconds": 3.269,
+  "p95_seconds": 4.682,
+  "estimated_total_cost_usd": 0.104681,
+  "cases": [
+    {
+      "id": "f1.setup",
+      "suite": "setup",
+      "user": "u_ana",
+      "passed": true,
+      "detail": "passed",
+      "model": "gpt-5.5",
+      "seconds": 4.697,
+      "input_tokens": 4069,
+      "cached_tokens": 1792,
+      "output_tokens": 100,
+      "estimated_cost_usd": 0.015281,
+      "model_calls": 2,
+      "sql_statements": 1
+    },
+    {
+      "id": "f1",
+      "suite": "questions",
+      "user": "u_ana",
+      "passed": true,
+      "detail": "passed",
+      "model": "gpt-5.5",
+      "seconds": 4.637,
+      "input_tokens": 4572,
+      "cached_tokens": 1792,
+      "output_tokens": 110,
+      "estimated_cost_usd": 0.018096,
+      "model_calls": 2,
+      "sql_statements": 1
+    },
+    {
+      "id": "f2.setup",
+      "suite": "setup",
+      "user": "u_cora",
+      "passed": true,
+      "detail": "passed",
+      "model": "gpt-5.5",
+      "seconds": 3.245,
+      "input_tokens": 4423,
+      "cached_tokens": 1792,
+      "output_tokens": 79,
+      "estimated_cost_usd": 0.016421,
+      "model_calls": 2,
+      "sql_statements": 1
+    },
+    {
+      "id": "f2",
+      "suite": "questions",
+      "user": "u_cora",
+      "passed": true,
+      "detail": "passed",
+      "model": "gpt-5.5",
+      "seconds": 2.935,
+      "input_tokens": 4903,
+      "cached_tokens": 1792,
+      "output_tokens": 87,
+      "estimated_cost_usd": 0.019061,
+      "model_calls": 2,
+      "sql_statements": 1
+    },
+    {
+      "id": "f3.setup",
+      "suite": "setup",
+      "user": "u_ana",
+      "passed": true,
+      "detail": "passed",
+      "model": "gpt-5.5",
+      "seconds": 3.293,
+      "input_tokens": 4133,
+      "cached_tokens": 1792,
+      "output_tokens": 147,
+      "estimated_cost_usd": 0.017011,
+      "model_calls": 2,
+      "sql_statements": 1
+    },
+    {
+      "id": "f3",
+      "suite": "questions",
+      "user": "u_ana",
+      "passed": true,
+      "detail": "passed",
+      "model": "gpt-5.5",
+      "seconds": 2.849,
+      "input_tokens": 4895,
+      "cached_tokens": 1792,
+      "output_tokens": 80,
+      "estimated_cost_usd": 0.018811,
+      "model_calls": 2,
+      "sql_statements": 0
+    }
+  ]
+}

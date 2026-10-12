@@ -1,0 +1,8 @@
+correctness + calibration
+  [32mpass[0m  f1   number   [2m4572in/110out 2t[0m
+  [32mpass[0m  f2   number   [2m4903in/87out 2t[0m
+  [32mpass[0m  f3   chart    [2m4895in/80out 2t[0m
+
+==============================================
+  correctness + calibration   3/3  (100%)
+==============================================

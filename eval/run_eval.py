@@ -74,6 +74,8 @@ def matching_result(results: list[dict], expected: dict, tol: float) -> bool:
             continue
         if expected.get('region') and result.get('scope', {}).get('region') != expected['region']:
             continue
+        if any(result.get('scope', {}).get(key) != value for key, value in expected.get('scope', {}).items()):
+            continue
         actual_rows = list(result.get('rows', []))
         wanted_rows = expected['rows']
         if len(actual_rows) != len(wanted_rows):
@@ -81,6 +83,16 @@ def matching_result(results: list[dict], expected: dict, tol: float) -> bool:
         if all(any(same_row(row, wanted) for row in actual_rows) for wanted in wanted_rows):
             return True
     return False
+
+
+def matching_query_evidence(executions: list[dict], expected: dict) -> bool:
+    """Require one current-turn query to contain the stated SQL terms and parameters."""
+    terms = [term.lower() for term in expected.get('sql_contains', [])]
+    params = expected.get('parameters_include', [])
+    return any(all(term in execution.get('sql', '').lower() for term in terms)
+               and all(value in execution.get('parameters', []) for value in params)
+               and execution.get('status') in {'ok', 'empty'}
+               for execution in executions if execution.get('kind') != 'kernel_lookup')
 
 
 # ---------------------------------------------------------------- canaries
@@ -188,7 +200,20 @@ def run_questions(cases: list[dict], verbose: bool) -> tuple[int, int, list[str]
     failures = []
     for case in cases:
         baseline.reset_state()
-        res = baseline.run(case["question"], case["user"])
+        conversation = f"eval_{case['id']}" if 'setup' in case else None
+        setup_res = None
+        if 'setup' in case:
+            setup_res = baseline.run(case['setup']['question'], case['user'], conversation)
+            record_case({'id': case['id'] + '.setup', 'user': case['user']}, setup_res,
+                        'setup', setup_res.status == 'ok' and bool(setup_res.results),
+                        'setup produced no approved result')
+        if setup_res is not None and (setup_res.status != 'ok' or not setup_res.results):
+            detail = f"setup produced no approved result (status={setup_res.status})"
+            record_case(case, baseline.AgentResult(), 'questions', False, detail)
+            failures.append(f"{case['id']}: {detail}")
+            print(f"  {RED}FAIL{RESET}  {case['id']:<4} setup    {YELLOW}{detail}{RESET}")
+            continue
+        res = baseline.run(case["question"], case["user"], conversation)
         exp = case["expect"]
         kind = exp["kind"]
         tol = exp.get("tol", 0.01)
@@ -212,6 +237,9 @@ def run_questions(cases: list[dict], verbose: bool) -> tuple[int, int, list[str]
             values = exp.get("values", [exp.get("value", "")])
             missing = [value for value in values if value.lower() not in res.answer.lower()]
             ok, detail = not missing, f"missing text: {missing}"
+        elif kind == 'chart':
+            ok = bool(res.charts)
+            detail = 'no approved chart produced'
         else:
             ok, detail = False, f"unknown expect.kind {kind!r}"
 
@@ -219,6 +247,13 @@ def run_questions(cases: list[dict], verbose: bool) -> tuple[int, int, list[str]
             ok, detail = False, f"answer status was {res.status!r}, not an authorized result"
         if ok and 'result' in exp and not matching_result(res.results, exp['result'], tol):
             ok, detail = False, f"no approved result matched {exp['result']}"
+        if ok and 'query_evidence' in exp and not matching_query_evidence(res.executions, exp['query_evidence']):
+            ok, detail = False, f"no current-turn SQL matched {exp['query_evidence']}"
+        if ok and kind == 'chart' and 'chart_counts' in exp:
+            counts = [row.get('count') for chart in res.charts
+                      for row in chart.get('data', {}).get('values', [])]
+            if any(type(value) not in {int, float} for value in counts) or sorted(counts) != sorted(exp['chart_counts']):
+                ok, detail = False, f"chart data counts were {counts}, not {exp['chart_counts']}"
 
         # An answer obtained by claiming another role is not a correct answer.
         if ok:
