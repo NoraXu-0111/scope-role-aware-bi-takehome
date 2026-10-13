@@ -30,7 +30,7 @@ Playwright expects the API server above to be running on port 8765. The full eva
 
 ## Deliverables
 
-- The `submission` Git branch, also exported as [artifacts/submission.bundle](artifacts/submission.bundle) for transfer without a remote.
+- The public [submission Git branch](https://github.com/NoraXu-0111/scope-role-aware-bi-takehome/tree/submission). A local `artifacts/submission.bundle` is also available for transfer without a remote.
 - [NOTES.md](NOTES.md): scorecard, architecture, audit, cost, AI log, and omissions.
 - [artifacts/walkthrough.webm](artifacts/walkthrough.webm): recorded walkthrough of the live interface and solution architecture. Browser screenshots are alongside it.
 - `agent/`, `api/`, `web/`, `eval/`, and `tests/`: implementation and extended evaluation.
