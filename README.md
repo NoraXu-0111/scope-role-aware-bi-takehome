@@ -26,7 +26,7 @@ Open <http://127.0.0.1:8765>. Choose a demonstration identity, ask a question, t
 cd web && npm run build && npx playwright test
 ```
 
-Playwright expects the API server above to be running on port 8765. The full evaluation calls the model and uses the configured API key. The saved [artifacts/eval.txt](artifacts/eval.txt) and [artifacts/eval.json](artifacts/eval.json) are the last completed full run (22/22 correctness, 24/24 access), before the three follow-up cases were added. Their focused real-model run passed 3/3; a later expanded full run encountered model-service errors and remains unverified. See [NOTES.md](NOTES.md) for the exact commands and attempt records.
+Playwright expects the API server above to be running on port 8765. The full evaluation calls the model and uses the configured API key. The saved [artifacts/eval.txt](artifacts/eval.txt) and [artifacts/eval.json](artifacts/eval.json) are the completed expanded run: **25/25 correctness and 24/24 access clean**, including three multi-turn follow-ups. See [NOTES.md](NOTES.md) for commands, measurements, and the earlier model-service interruption.
 
 ## Deliverables
 
